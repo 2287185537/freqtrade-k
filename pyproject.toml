@@ -32,7 +32,7 @@ dependencies = [
   # from requirements.txt
   "ccxt>=4.5.4",
   "SQLAlchemy>=2.0.6",
-  "python-telegram-bot>=20.1",
+  # Removed: "python-telegram-bot>=20.1",  # RPC removed
   "humanize>=4.0.0",
   "cachetools",
   "requests",
@@ -54,28 +54,29 @@ dependencies = [
   "joblib>=1.2.0",
   "rich",
   'pyarrow; platform_machine != "armv7l"',
-  "fastapi",
+  # Removed API server dependencies
+  # "fastapi",
   "pydantic>=2.2.0",
-  "pyjwt",
-  "websockets",
-  "uvicorn",
+  # "pyjwt",
+  # "websockets",
+  # "uvicorn",
   "psutil",
   "schedule",
-  "janus",
+  # "janus",
   "ast-comments",
-  "aiofiles",
+  # "aiofiles",
   "aiohttp",
   "cryptography",
   "sdnotify",
   "python-dateutil",
   "pytz",
   "packaging",
-  "freqtrade-client",
+  # Removed: "freqtrade-client",  # Client removed
 ]
 
 [project.optional-dependencies]
 # Requirements used for submodules
-plot = ["plotly>=4.0"]
+# Removed: plot = ["plotly>=4.0"]  # Plot module removed
 hyperopt = [
   "scipy",
   "scikit-learn",
@@ -83,21 +84,7 @@ hyperopt = [
   "cmaes",
   "filelock",
 ]
-freqai = [
-  "scikit-learn",
-  "joblib",
-  "lightgbm",
-  "xgboost",
-  "tensorboard",
-  "datasieve>=0.1.5",
-]
-freqai_rl = [
-  "torch; sys_platform != 'darwin' or platform_machine != 'x86_64'",
-  "gymnasium",
-  "stable-baselines3; sys_platform != 'darwin' or platform_machine != 'x86_64'",
-  "sb3-contrib; sys_platform != 'darwin' or platform_machine != 'x86_64'",
-  "tqdm",
-]
+# Removed: freqai and freqai_rl - FreqAI removed
 develop = [
   "isort",
   "mypy",
@@ -125,7 +112,7 @@ jupyter = [
   "nbconvert",
 ]
 all = [
-  "freqtrade[plot,hyperopt,freqai,freqai_rl,jupyter]",
+  "freqtrade[hyperopt,jupyter]",  # Removed plot, freqai, freqai_rl
 ]
 dev = [
   "freqtrade[all,develop]",

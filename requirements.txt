@@ -11,7 +11,7 @@ ccxt==4.5.35
 cryptography==46.0.3
 aiohttp==3.13.3
 SQLAlchemy==2.0.46
-python-telegram-bot==22.6
+# Removed: python-telegram-bot (RPC removed)
 # can't be hard-pinned due to telegram-bot pinning httpx with ~
 httpx>=0.24.1
 humanize==4.15.0
@@ -36,12 +36,13 @@ orjson==3.11.5
 # Notify systemd
 sdnotify==0.3.2
 
-# API Server
-fastapi==0.128.0
+# API Server - removed (no web interface)
+# fastapi==0.128.0
+# pydantic - still needed for validation
 pydantic==2.12.5
-uvicorn==0.40.0
-pyjwt==2.10.1
-aiofiles==25.1.0
+# uvicorn==0.40.0
+# pyjwt==2.10.1
+# aiofiles==25.1.0
 psutil==7.2.1
 
 # Building config files interactively
@@ -54,9 +55,9 @@ pytz==2025.2
 #Futures
 schedule==1.2.2
 
-#WS Messages
-websockets==16.0
-janus==2.0.0
+#WS Messages - removed (no web interface)
+# websockets==16.0
+# janus==2.0.0
 
 ast-comments==1.2.3
 packaging==26.0

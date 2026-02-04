@@ -20,13 +20,11 @@ from freqtrade.constants import (
     PairWithTimeframe,
 )
 from freqtrade.data.history import get_datahandler, load_pair_history
-from freqtrade.enums import CandleType, RPCMessageType, RunMode, TradingMode
+from freqtrade.enums import CandleType, RunMode, TradingMode
 from freqtrade.exceptions import ExchangeError, OperationalException
 from freqtrade.exchange import Exchange, timeframe_to_prev_date, timeframe_to_seconds
 from freqtrade.exchange.exchange_types import FundingRate, OrderBook
 from freqtrade.misc import append_candles_to_dataframe
-from freqtrade.rpc import RPCManager
-from freqtrade.rpc.rpc_types import RPCAnalyzedDFMsg
 from freqtrade.util import PeriodicCache
 
 
@@ -42,12 +40,12 @@ class DataProvider:
         config: Config,
         exchange: Exchange | None,
         pairlists=None,
-        rpc: RPCManager | None = None,
+        rpc=None,  # RPC removed - kept for compatibility
     ) -> None:
         self._config = config
         self._exchange = exchange
         self._pairlists = pairlists
-        self.__rpc = rpc
+        self.__rpc = None  # RPC functionality disabled
         self.__cached_pairs: dict[PairWithTimeframe, tuple[DataFrame, datetime]] = {}
         self.__slice_index: dict[str, int] = {}
         self.__slice_date: datetime | None = None

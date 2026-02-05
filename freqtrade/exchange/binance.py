@@ -224,21 +224,49 @@ class Binance(Exchange):
         until_ms: int | None = None,
     ) -> DataFrame:
         """
-        Fastly fetch OHLCV data by leveraging https://data.binance.vision.
+        Fastly fetch OHLCV data by leveraging https://data.binance.vision (or custom mirror).
+        Supports custom data mirror URLs and disabling API fallback via config.
+        
+        Config options:
+        - exchange.binance_data_mirror_url: Custom base URL for Binance data archive mirror
+        - exchange.disable_binance_api_fallback: Disable fallback to REST API (offline mode)
         """
+        # Get configuration options
+        base_url = self._config.get("exchange", {}).get("binance_data_mirror_url")
+        disable_api_fallback = self._config.get("exchange", {}).get(
+            "disable_binance_api_fallback", False
+        )
+        
         with self._loop_lock:
-            df = self.loop.run_until_complete(
-                download_archive_ohlcv(
-                    candle_type=candle_type,
-                    pair=pair,
-                    timeframe=timeframe,
-                    since_ms=since_ms,
-                    until_ms=until_ms,
-                    markets=self.markets,
+            try:
+                df = self.loop.run_until_complete(
+                    download_archive_ohlcv(
+                        candle_type=candle_type,
+                        pair=pair,
+                        timeframe=timeframe,
+                        since_ms=since_ms,
+                        until_ms=until_ms,
+                        markets=self.markets,
+                        base_url=base_url,
+                        disable_api_fallback=disable_api_fallback,
+                    )
                 )
-            )
+            except Exception as e:
+                if disable_api_fallback:
+                    logger.error(
+                        f"Failed to download data from archive with API fallback disabled. "
+                        f"Pair: {pair}, Error: {e}"
+                    )
+                    raise
+                # If disable_api_fallback is False, the exception was already logged
+                # in download_archive_ohlcv, so we just have an empty DataFrame here
+                df = DataFrame()
 
-        # download the remaining data from rest API
+        # If API fallback is disabled and we have data from archive, return it directly
+        if disable_api_fallback:
+            return df
+        
+        # download the remaining data from rest API (original behavior when API fallback enabled)
         if df.empty:
             rest_since_ms = since_ms
         else:

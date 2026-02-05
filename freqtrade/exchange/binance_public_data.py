@@ -46,9 +46,11 @@ async def download_archive_ohlcv(
     until_ms: int | None,
     markets: dict[str, Any],
     stop_on_404: bool = True,
+    base_url: str | None = None,
+    disable_api_fallback: bool = False,
 ) -> DataFrame:
     """
-    Fetch OHLCV data from https://data.binance.vision
+    Fetch OHLCV data from https://data.binance.vision (or custom mirror)
     The function makes its best effort to download data within the time range
     [`since_ms`, `until_ms`] -- including `since_ms`, but excluding `until_ms`.
     If `stop_one_404` is True, this returned DataFrame is guaranteed to start from `since_ms`
@@ -62,6 +64,10 @@ async def download_archive_ohlcv(
     :markets: the CCXT markets dict, when it's None, the function will load the markets data
         from a new `ccxt.binance` instance
     :param stop_on_404: Stop to download the following data when a 404 returned
+    :param base_url: Custom base URL for mirror or alternative data source.
+                     Defaults to 'https://data.binance.vision'
+    :param disable_api_fallback: If True, raise exception instead of returning empty DataFrame
+                                 on failure (prevents fallback to REST API)
     :return: the date range is between [since_ms, until_ms), return an empty DataFrame if no data
         available in the time range
     """
@@ -78,14 +84,21 @@ async def download_archive_ohlcv(
         if start >= end:
             return DataFrame()
         df = await _download_archive_ohlcv(
-            symbol, pair, timeframe, candle_type, start, end, stop_on_404
+            symbol, pair, timeframe, candle_type, start, end, stop_on_404, base_url=base_url
         )
+        data_source = base_url if base_url else "https://data.binance.vision"
         logger.debug(
-            f"Downloaded data for {pair} from https://data.binance.vision with length {len(df)}."
+            f"Downloaded data for {pair} from {data_source} with length {len(df)}."
         )
     except Exception as e:
+        if disable_api_fallback:
+            logger.error(
+                f"Failed to download from archive source. API fallback is disabled. "
+                f"Error: {e}"
+            )
+            raise
         logger.warning(
-            "An exception occurred during fast download from Binance, falling back to "
+            "An exception occurred during fast download from Binance archive, falling back to "
             "the slower REST API, this can take more time.",
             exc_info=e,
         )
@@ -113,6 +126,7 @@ async def _download_archive_ohlcv(
     start: date,
     end: date,
     stop_on_404: bool,
+    base_url: str | None = None,
 ) -> DataFrame:
     # daily dataframes, `None` indicates missing data in that day (when `stop_on_404` is False)
     dfs: list[DataFrame | None] = []
@@ -124,7 +138,7 @@ async def _download_archive_ohlcv(
         # the HTTP connections has been throttled by TCPConnector
         for dates in chunks(list(date_range(start, end)), 1000):
             tasks = [
-                asyncio.create_task(get_daily_ohlcv(symbol, timeframe, candle_type, date, session))
+                asyncio.create_task(get_daily_ohlcv(symbol, timeframe, candle_type, date, session, base_url=base_url))
                 for date in dates
             ]
             for task in tasks:
@@ -200,30 +214,46 @@ def candle_type_to_url_segment(candle_type: CandleType) -> str:
 
 
 def binance_vision_ohlcv_zip_url(
-    symbol: str, timeframe: str, candle_type: CandleType, date: date
+    symbol: str, timeframe: str, candle_type: CandleType, date: date, base_url: str | None = None
 ) -> str:
     """
     example urls:
     https://data.binance.vision/data/spot/daily/klines/BTCUSDT/1s/BTCUSDT-1s-2023-10-27.zip
     https://data.binance.vision/data/futures/um/daily/klines/BTCUSDT/1h/BTCUSDT-1h-2023-10-27.zip
+    
+    :param base_url: Custom base URL for mirror or alternative data source.
+                     Defaults to 'https://data.binance.vision'
     """
+    if base_url is None:
+        base_url = "https://data.binance.vision"
+    # Remove trailing slash if present
+    base_url = base_url.rstrip('/')
+    
     asset_type_url_segment = candle_type_to_url_segment(candle_type)
     url = (
-        f"https://data.binance.vision/data/{asset_type_url_segment}/daily/klines/{symbol}"
+        f"{base_url}/data/{asset_type_url_segment}/daily/klines/{symbol}"
         f"/{timeframe}/{binance_vision_zip_name(symbol, timeframe, date)}"
     )
     return url
 
 
-def binance_vision_trades_zip_url(symbol: str, candle_type: CandleType, date: date) -> str:
+def binance_vision_trades_zip_url(symbol: str, candle_type: CandleType, date: date, base_url: str | None = None) -> str:
     """
     example urls:
     https://data.binance.vision/data/spot/daily/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-10-27.zip
     https://data.binance.vision/data/futures/um/daily/aggTrades/BTCUSDT/BTCUSDT-aggTrades-2023-10-27.zip
+    
+    :param base_url: Custom base URL for mirror or alternative data source.
+                     Defaults to 'https://data.binance.vision'
     """
+    if base_url is None:
+        base_url = "https://data.binance.vision"
+    # Remove trailing slash if present
+    base_url = base_url.rstrip('/')
+    
     asset_type_url_segment = candle_type_to_url_segment(candle_type)
     url = (
-        f"https://data.binance.vision/data/{asset_type_url_segment}/daily/aggTrades/{symbol}"
+        f"{base_url}/data/{asset_type_url_segment}/daily/aggTrades/{symbol}"
         f"/{symbol}-aggTrades-{date.strftime('%Y-%m-%d')}.zip"
     )
     return url
@@ -237,9 +267,10 @@ async def get_daily_ohlcv(
     session: aiohttp.ClientSession,
     retry_count: int = 3,
     retry_delay: float = 0.0,
+    base_url: str | None = None,
 ) -> DataFrame:
     """
-    Get daily OHLCV from https://data.binance.vision
+    Get daily OHLCV from https://data.binance.vision (or custom mirror)
     See https://github.com/binance/binance-public-data
 
     :symbol: binance symbol name, e.g. BTCUSDT
@@ -249,10 +280,11 @@ async def get_daily_ohlcv(
     :session: an aiohttp.ClientSession instance
     :retry_count: times to retry before returning the exceptions
     :retry_delay: the time to wait before every retry
+    :base_url: Custom base URL for mirror or alternative data source
     :return: A dataframe containing columns date,open,high,low,close,volume
     """
 
-    url = binance_vision_ohlcv_zip_url(symbol, timeframe, candle_type, date)
+    url = binance_vision_ohlcv_zip_url(symbol, timeframe, candle_type, date, base_url)
 
     logger.debug(f"download data from binance: {url}")
 

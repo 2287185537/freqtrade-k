@@ -27,6 +27,9 @@ joblib==1.5.3
 rich==14.3.1
 pyarrow==23.0.0; platform_machine != 'armv7l'
 
+# Optional: python-binance for alternative data download method
+# Install with: pip install python-binance
+# python-binance==1.0.19
 
 # Load ticker files 30% faster
 python-rapidjson==1.23

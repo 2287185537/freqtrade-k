@@ -179,19 +179,6 @@ class IStrategy(ABC, HyperStrategyMixin):
     def load_freqAI_model(self) -> None:
         # FreqAI removed - method disabled
         pass
-        else:
-            # Gracious failures if freqAI is disabled but "start" is called.
-            class DummyClass:
-                def start(self, *args, **kwargs):
-                    raise OperationalException(
-                        "freqAI is not enabled. "
-                        "Please enable it in your config to use this strategy."
-                    )
-
-                def shutdown(self, *args, **kwargs):
-                    pass
-
-            self.freqai = DummyClass()  # type: ignore
 
     def ft_bot_start(self, **kwargs) -> None:
         """

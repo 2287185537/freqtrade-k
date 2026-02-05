@@ -55,16 +55,6 @@ SUPPORTED_EXCHANGES = [
     "binance",
     "binanceus",
     "binanceusdm",
-    "bingx",
-    "bitmart",
-    "bitget",
-    "bybit",
-    "gate",
-    "htx",
-    "hyperliquid",
-    "kraken",
-    "okx",
-    "myokx",
 ]
 
 # either the main, or replacement methods (array) is required

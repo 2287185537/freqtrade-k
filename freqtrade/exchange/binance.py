@@ -224,21 +224,83 @@ class Binance(Exchange):
         until_ms: int | None = None,
     ) -> DataFrame:
         """
-        Fastly fetch OHLCV data by leveraging https://data.binance.vision.
+        Fastly fetch OHLCV data by leveraging multiple data sources.
+        
+        Config options:
+        - exchange.use_python_binance_client: Use python-binance library (highest priority)
+        - exchange.binance_data_mirror_url: Custom base URL for Binance data archive mirror
+        - exchange.disable_binance_api_fallback: Disable fallback to REST API (offline mode)
         """
-        with self._loop_lock:
-            df = self.loop.run_until_complete(
-                download_archive_ohlcv(
-                    candle_type=candle_type,
-                    pair=pair,
-                    timeframe=timeframe,
-                    since_ms=since_ms,
-                    until_ms=until_ms,
-                    markets=self.markets,
-                )
+        # Get configuration options
+        use_python_binance = self._config.get("exchange", {}).get(
+            "use_python_binance_client", False
+        )
+        base_url = self._config.get("exchange", {}).get("binance_data_mirror_url")
+        disable_api_fallback = self._config.get("exchange", {}).get(
+            "disable_binance_api_fallback", False
+        )
+        
+        # Priority 1: Use python-binance library if configured
+        if use_python_binance:
+            from freqtrade.exchange.binance_client_data import download_ohlcv_with_python_binance
+            
+            logger.info(f"Using python-binance library to download {pair} data")
+            df = download_ohlcv_with_python_binance(
+                pair=pair,
+                timeframe=timeframe,
+                since_ms=since_ms,
+                until_ms=until_ms,
+                candle_type=candle_type,
+                markets=self.markets,
             )
+            
+            if not df.empty:
+                return df
+            
+            # If python-binance failed and API fallback is disabled, return empty
+            if disable_api_fallback:
+                logger.warning(
+                    f"python-binance download failed and API fallback is disabled. "
+                    f"Returning empty DataFrame for {pair}"
+                )
+                return df
+            
+            # Otherwise, fall through to try other methods
+            logger.warning(
+                "python-binance download failed, trying Binance Vision archive..."
+            )
+        
+        # Priority 2: Use Binance Vision archive (or custom mirror)
+        with self._loop_lock:
+            try:
+                df = self.loop.run_until_complete(
+                    download_archive_ohlcv(
+                        candle_type=candle_type,
+                        pair=pair,
+                        timeframe=timeframe,
+                        since_ms=since_ms,
+                        until_ms=until_ms,
+                        markets=self.markets,
+                        base_url=base_url,
+                        disable_api_fallback=disable_api_fallback,
+                    )
+                )
+            except Exception as e:
+                if disable_api_fallback:
+                    logger.error(
+                        f"Failed to download data from archive with API fallback disabled. "
+                        f"Pair: {pair}, Error: {e}"
+                    )
+                    raise
+                # If disable_api_fallback is False, the exception was already logged
+                # in download_archive_ohlcv, so we just have an empty DataFrame here
+                df = DataFrame()
 
-        # download the remaining data from rest API
+        # If API fallback is disabled and we have data from archive, return it directly
+        if disable_api_fallback:
+            return df
+        
+        # Priority 3: download the remaining data from rest API (original behavior when API fallback enabled)
         if df.empty:
             rest_since_ms = since_ms
         else:

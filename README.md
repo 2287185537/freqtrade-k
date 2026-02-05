@@ -1,13 +1,33 @@
-# ![freqtrade](https://raw.githubusercontent.com/freqtrade/freqtrade/develop/docs/assets/freqtrade_poweredby.svg)
+# Freqtrade - Contract Backtesting Only (合约回测专用版)
 
 [![Freqtrade CI](https://github.com/freqtrade/freqtrade/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/freqtrade/freqtrade/actions/workflows/ci.yml)
-[![DOI](https://joss.theoj.org/papers/10.21105/joss.04864/status.svg)](https://doi.org/10.21105/joss.04864)
-[![Coverage Status](https://coveralls.io/repos/github/freqtrade/freqtrade/badge.svg?branch=develop&service=github)](https://coveralls.io/github/freqtrade/freqtrade?branch=develop)
-[![Documentation](https://readthedocs.org/projects/freqtrade/badge/)](https://www.freqtrade.io)
 
-Freqtrade is a free and open source crypto trading bot written in Python. It is designed to support all major exchanges and be controlled via Telegram or webUI. It contains backtesting, plotting and money management tools as well as strategy optimization by machine learning.
+**This is a streamlined version of Freqtrade focused exclusively on contract (futures) backtesting.**
 
-![freqtrade](https://raw.githubusercontent.com/freqtrade/freqtrade/develop/docs/assets/freqtrade-screenshot.png)
+## 概述 (Overview)
+
+本版本是 Freqtrade 的精简版，专注于合约（期货）回测功能。已删除实盘交易、RPC 通知、FreqAI 机器学习、Web 界面等非核心功能。
+
+This version is a streamlined Freqtrade focused on contract (futures) backtesting. Live trading, RPC notifications, FreqAI machine learning, Web interface and other non-core features have been removed.
+
+## 核心功能 (Core Features)
+
+### 保留的功能 (Retained Features)
+- ✅ **回测引擎** (Backtesting Engine) - 完整的回测功能
+- ✅ **Binance 支持** (Binance Support) - 仅保留 Binance 交易所
+- ✅ **合约/期货** (Futures/Contracts) - 完整的合约交易回测
+- ✅ **清算价格计算** (Liquidation Price Calculation)
+- ✅ **策略系统** (Strategy System) - 完整的策略接口
+- ✅ **数据管理** (Data Management) - 数据下载和转换
+- ✅ **内存数据库** (In-Memory Database) - 回测使用内存模式
+
+### 已删除功能 (Removed Features)
+- ❌ 实盘交易 (Live Trading)
+- ❌ RPC 通知 (Telegram、Discord、Webhook)
+- ❌ FreqAI 机器学习 (FreqAI Machine Learning)
+- ❌ Web 界面 (Web Interface)
+- ❌ 绘图功能 (Plotting)
+- ❌ 其他交易所 (Other Exchanges - only Binance retained)
 
 ## Disclaimer
 
@@ -15,175 +35,110 @@ This software is for educational purposes only. Do not risk money which
 you are afraid to lose. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHORS
 AND ALL AFFILIATES ASSUME NO RESPONSIBILITY FOR YOUR TRADING RESULTS.
 
-Always start by running a trading bot in Dry-Run and do not engage money
-before you understand how it works and what profit/loss you should
-expect.
+## Supported Exchange
 
-We strongly recommend you to have coding and Python knowledge. Do not
-hesitate to read the source code and understand the mechanism of this bot.
+### Binance (币安)
 
-## Supported Exchange marketplaces
+Only Binance exchange is supported in this version:
 
-Please read the [exchange-specific notes](docs/exchanges.md) to learn about special configurations that maybe needed for each exchange.
-
-### Supported Spot Exchanges
-
-- [X] [Binance](https://www.binance.com/)
-- [X] [BingX](https://bingx.com/invite/0EM9RX)
-- [X] [Bitget](https://www.bitget.com/)
-- [X] [Bitmart](https://bitmart.com/)
-- [X] [Bybit](https://bybit.com/)
-- [X] [Gate.io](https://www.gate.io/ref/6266643)
-- [X] [HTX](https://www.htx.com/)
-- [X] [Hyperliquid](https://hyperliquid.xyz/) (A decentralized exchange, or DEX)
-- [X] [Kraken](https://kraken.com/)
-- [X] [OKX](https://okx.com/)
-- [X] [MyOKX](https://okx.com/) (OKX EEA)
-- [ ] [potentially many others](https://github.com/ccxt/ccxt/). _(We cannot guarantee they will work)_
-
-### Supported Futures Exchanges
-
-- [X] [Binance](https://www.binance.com/)
-- [X] [Bitget](https://www.bitget.com/)
-- [X] [Gate.io](https://www.gate.io/ref/6266643)
-- [X] [Hyperliquid](https://hyperliquid.xyz/) (A decentralized exchange, or DEX)
-- [X] [OKX](https://okx.com/)
+- [X] [Binance](https://www.binance.com/) - Spot & Futures
+- [X] [Binance US](https://www.binance.us/) - Spot
+- [X] [Binance USDⓈ-M Futures](https://www.binance.com/en/futures/BTCUSDT) - Futures
 - [X] [Bybit](https://bybit.com/)
 
 Please make sure to read the [exchange specific notes](docs/exchanges.md), as well as the [trading with leverage](docs/leverage.md) documentation before diving in.
 
-### Community tested
+## Installation (安装)
 
-Exchanges confirmed working by the community:
+### Requirements (要求)
 
-- [X] [Bitvavo](https://bitvavo.com/)
-- [X] [Kucoin](https://www.kucoin.com/)
+- Python 3.11+
+- pip
 
-## Documentation
+### Install (安装步骤)
 
-We invite you to read the bot documentation to ensure you understand how the bot is working.
+```bash
+# Clone the repository
+git clone https://github.com/2287185537/freqtrade-k.git
+cd freqtrade-k
 
-Please find the complete documentation on the [freqtrade website](https://www.freqtrade.io).
+# Install dependencies
+pip install -r requirements.txt
 
-## Features
+# Install the package
+pip install -e .
+```
 
-- [x] **Based on Python 3.11+**: For botting on any operating system - Windows, macOS and Linux.
-- [x] **Persistence**: Persistence is achieved through sqlite.
-- [x] **Dry-run**: Run the bot without paying money.
-- [x] **Backtesting**: Run a simulation of your buy/sell strategy.
-- [x] **Strategy Optimization by machine learning**: Use machine learning to optimize your buy/sell strategy parameters with real exchange data.
-- [X] **Adaptive prediction modeling**: Build a smart strategy with FreqAI that self-trains to the market via adaptive machine learning methods. [Learn more](https://www.freqtrade.io/en/stable/freqai/)
-- [x] **Whitelist crypto-currencies**: Select which crypto-currency you want to trade or use dynamic whitelists.
-- [x] **Blacklist crypto-currencies**: Select which crypto-currency you want to avoid.
-- [x] **Builtin WebUI**: Builtin web UI to manage your bot.
-- [x] **Manageable via Telegram**: Manage the bot with Telegram.
-- [x] **Display profit/loss in fiat**: Display your profit/loss in fiat currency.
-- [x] **Performance status report**: Provide a performance status of your current trades.
+## Quick Start (快速开始)
 
-## Quick start
+### Download Data (下载数据)
 
-Please refer to the [Docker Quickstart documentation](https://www.freqtrade.io/en/stable/docker_quickstart/) on how to get started quickly.
+```bash
+# Download Binance USDT futures data
+freqtrade download-data --exchange binance --pairs BTC/USDT ETH/USDT --timeframe 1h --trading-mode futures --days 30
+```
 
-For further (native) installation methods, please refer to the [Installation documentation page](https://www.freqtrade.io/en/stable/installation/).
+### Run Backtesting (运行回测)
 
-## Basic Usage
+```bash
+# Run backtesting with your strategy
+freqtrade backtesting --strategy YourStrategy --timeframe 1h --timerange 20240101-20240131
+```
 
-### Bot commands
+## Available Commands (可用命令)
 
 ```
 usage: freqtrade [-h] [-V]
-                 {trade,create-userdir,new-config,show-config,new-strategy,download-data,convert-data,convert-trade-data,trades-to-ohlcv,list-data,backtesting,backtesting-show,backtesting-analysis,edge,hyperopt,hyperopt-list,hyperopt-show,list-exchanges,list-markets,list-pairs,list-strategies,list-hyperoptloss,list-freqaimodels,list-timeframes,show-trades,test-pairlist,convert-db,install-ui,plot-dataframe,plot-profit,webserver,strategy-updater,lookahead-analysis,recursive-analysis}
+                 {new-config,show-config,download-data,convert-data,
+                  convert-trade-data,trades-to-ohlcv,list-data,backtesting,
+                  backtesting-show,backtesting-analysis,edge,hyperopt,
+                  list-exchanges,list-markets,list-pairs,list-strategies,
+                  list-hyperoptloss,list-timeframes,show-trades,convert-db,
+                  strategy-updater,lookahead-analysis,recursive-analysis}
                  ...
-
-Free, open source crypto trading bot
-
-positional arguments:
-  {trade,create-userdir,new-config,show-config,new-strategy,download-data,convert-data,convert-trade-data,trades-to-ohlcv,list-data,backtesting,backtesting-show,backtesting-analysis,edge,hyperopt,hyperopt-list,hyperopt-show,list-exchanges,list-markets,list-pairs,list-strategies,list-hyperoptloss,list-freqaimodels,list-timeframes,show-trades,test-pairlist,convert-db,install-ui,plot-dataframe,plot-profit,webserver,strategy-updater,lookahead-analysis,recursive-analysis}
-    trade               Trade module.
-    create-userdir      Create user-data directory.
-    new-config          Create new config
-    show-config         Show resolved config
-    new-strategy        Create new strategy
-    download-data       Download backtesting data.
-    convert-data        Convert candle (OHLCV) data from one format to
-                        another.
-    convert-trade-data  Convert trade data from one format to another.
-    trades-to-ohlcv     Convert trade data to OHLCV data.
-    list-data           List downloaded data.
-    backtesting         Backtesting module.
-    backtesting-show    Show past Backtest results
-    backtesting-analysis
-                        Backtest Analysis module.
-    hyperopt            Hyperopt module.
-    hyperopt-list       List Hyperopt results
-    hyperopt-show       Show details of Hyperopt results
-    list-exchanges      Print available exchanges.
-    list-markets        Print markets on exchange.
-    list-pairs          Print pairs on exchange.
-    list-strategies     Print available strategies.
-    list-hyperoptloss   Print available hyperopt loss functions.
-    list-freqaimodels   Print available freqAI models.
-    list-timeframes     Print available timeframes for the exchange.
-    show-trades         Show trades.
-    test-pairlist       Test your pairlist configuration.
-    convert-db          Migrate database to different system
-    install-ui          Install FreqUI
-    plot-dataframe      Plot candles with indicators.
-    plot-profit         Generate plot showing profits.
-    webserver           Webserver module.
-    strategy-updater    updates outdated strategy files to the current version
-    lookahead-analysis  Check for potential look ahead bias.
-    recursive-analysis  Check for potential recursive formula issue.
-
-options:
-  -h, --help            show this help message and exit
-  -V, --version         show program's version number and exit
 ```
 
-### Telegram RPC commands
+### Key Commands (核心命令)
 
-Telegram is not mandatory. However, this is a great way to control your bot. More details and the full command list on the [documentation](https://www.freqtrade.io/en/latest/telegram-usage/)
+- `backtesting` - Run backtesting (运行回测)
+- `download-data` - Download historical data (下载历史数据)
+- `list-strategies` - List available strategies (列出可用策略)
+- `new-config` - Create new configuration file (创建新配置文件)
+- `show-config` - Show current configuration (显示当前配置)
 
-- `/start`: Starts the trader.
-- `/stop`: Stops the trader.
-- `/stopentry`: Stop entering new trades.
-- `/status <trade_id>|[table]`: Lists all or specific open trades.
-- `/profit [<n>]`: Lists cumulative profit from all finished trades, over the last n days.
-- `/profit_long [<n>]`: Lists cumulative profit from all finished long trades, over the last n days.
-- `/profit_short [<n>]`: Lists cumulative profit from all finished short trades, over the last n days.
-- `/forceexit <trade_id>|all`: Instantly exits the given trade (Ignoring `minimum_roi`).
-- `/fx <trade_id>|all`: Alias to `/forceexit`
-- `/performance`: Show performance of each finished trade grouped by pair
-- `/balance`: Show account balance per currency.
-- `/daily <n>`: Shows profit or loss per day, over the last n days.
-- `/help`: Show help message.
-- `/version`: Show version.
+## Features (功能特性)
 
+- [x] **Contract Backtesting** (合约回测): Complete futures/margin backtesting support
+- [x] **Binance Integration** (币安集成): Full Binance spot and futures support
+- [x] **Liquidation Calculation** (清算计算): Accurate liquidation price calculation
+- [x] **In-Memory Database** (内存数据库): Fast backtesting with in-memory mode
+- [x] **Strategy System** (策略系统): Full strategy interface and framework
+- [x] **Data Management** (数据管理): Download and convert historical data
 
-## Development branches
+## What's Removed (已删除功能)
+    list-freqaimodels   Print available freqAI models.
+## What's Removed (已删除功能)
 
-The project is currently setup in two main branches:
+This streamlined version has removed the following features:
 
-- `develop` - This branch has often new features, but might also contain breaking changes. We try hard to keep this branch as stable as possible.
-- `stable` - This branch contains the latest stable release. This branch is generally well tested.
-- `feat/*` - These are feature branches, which are being worked on heavily. Please don't use these unless you want to test a specific feature.
+- ❌ **Live Trading** (实盘交易): freqtradebot.py, worker.py removed
+- ❌ **RPC Notifications** (RPC 通知): Telegram, Discord, Webhook removed  
+- ❌ **Web Interface** (Web 界面): API server, WebUI removed
+- ❌ **FreqAI** (机器学习): All machine learning features removed
+- ❌ **Plotting** (绘图): Plot dataframe and profit visualization removed
+- ❌ **Other Exchanges** (其他交易所): Only Binance retained, 18+ exchanges removed
+- ❌ **Hyperopt List/Show** (超参数优化列表): Hyperopt list and show commands removed
+- ❌ **Pairlist Testing** (交易对列表测试): Test pairlist command removed
 
-## Support
+## Original Documentation (原始文档)
 
-### Help / Discord
+For the full Freqtrade documentation (with all features), please visit the [official Freqtrade website](https://www.freqtrade.io).
 
-For any questions not covered by the documentation or for further information about the bot, or to simply engage with like-minded individuals, we encourage you to join the Freqtrade [discord server](https://discord.gg/p7nuUNVfP7).
+本版本仅保留回测功能。完整文档请访问 [Freqtrade 官方网站](https://www.freqtrade.io)。
 
-### [Bugs / Issues](https://github.com/freqtrade/freqtrade/issues?q=is%3Aissue)
+## License
 
-If you discover a bug in the bot, please
-[search the issue tracker](https://github.com/freqtrade/freqtrade/issues?q=is%3Aissue)
-first. If it hasn't been reported, please
-[create a new issue](https://github.com/freqtrade/freqtrade/issues/new/choose) and
-ensure you follow the template guide so that the team can assist you as
-quickly as possible.
-
-For every [issue](https://github.com/freqtrade/freqtrade/issues/new/choose) created, kindly follow up and mark satisfaction or reminder to close issue when equilibrium ground is reached.
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 
 --Maintain github's [community policy](https://docs.github.com/en/site-policy/github-terms/github-community-code-of-conduct)--
 
